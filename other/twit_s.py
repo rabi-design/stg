@@ -21,4 +21,4 @@ for i in range(5):
             senset.append(d.text)
 
 a.close()
-a.quit()  # test
+a.quit()  # test1
