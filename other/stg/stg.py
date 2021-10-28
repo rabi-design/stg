@@ -158,6 +158,7 @@ class EnemyBullet:  # 敵の弾
             self.destroy()
 
     def destroy(self):
+        bullet1.pop(self.id)
         cv.delete(self.id)
 
 
