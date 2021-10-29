@@ -6,12 +6,11 @@ from time import time
 from glob import glob
 from pygame.locals import *
 
-
 WINDOW_HEIGHT = 600  # ウィンドウの高さ
 WINDOW_WIDTH = 800  # ウィンドウの幅
 sys.setrecursionlimit(100000)
 CANNON_Y = 400  # 自機のy座標
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d, %d" %(100, 100)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d, %d" % (100, 100)
 NUMBER_OF_ENEMY = 18  # 敵の数
 ENEMY_SHOOT_INTERVAL = 200  # 敵がランダムに弾を打ってくる間隔
 
@@ -24,6 +23,7 @@ pygame.init()
 w = 50
 h = 50
 
+
 # noinspection PyAttributeOutsideInit,PyMethodMayBeStatic
 class Cannon:  # 自機
     def __init__(self, x, y=CANNON_Y):
@@ -35,14 +35,14 @@ class Cannon:  # 自機
         self.id = cv.create_image(
             self.x,
             self.y,
-            image=cannon_tkimg,
-            tag="cannon"
+            image = cannon_tkimg,
+            tag = "cannon"
         )
 
     def bind(self):
         # cv.tag_bind(self.id, "<ButtonPress-3>", self.pressed)
         # cv.tag_bind(self.id, "<Button1-Motion>", self.dragged)
-        #root.bind("<KeyPress>", self.key_event)
+        # root.bind("<KeyPress>", self.key_event)
         self.key_event(pygame.key.get_pressed())
         root.after(50, self.bind)
 
@@ -70,6 +70,12 @@ class Cannon:  # 自機
         if key[K_DOWN] == 1:
             mo_v = mo
             self.y += mo
+        if key[K_z] == 1:
+            sy = self.y + 50
+            myb = mybullet(self.x, sy)
+            myb.draw()
+            myb.shoot()
+
         cv.move(self.id, mo_s, mo_v)
         # try:
         #     dx = self.x + ex
@@ -91,6 +97,34 @@ class Cannon:  # 自機
         cv.delete(self.id)
 
 
+# noinspection PyAttributeOutsideInit
+class mybullet:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    # noinspection PyAttributeOutsideInit
+    def draw(self):
+        self.id = cv.create_image(self.x, self.y, image = shot_tkimg, tag = "bullet")
+        mybullets.append(self.id)
+
+    # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
+    def shoot(self):
+        if -100 < self.y <= WINDOW_HEIGHT + 100 and -100 < self.x < WINDOW_WIDTH + 100:
+            if (self.x - ene_w) ^ 2 + (self.y - ene_h) ^ 2 < 250000:
+                self.destroy()
+                destroy2()
+            cv.move(self.id, 0, BULLET_HEIGHT)
+            self.y += BULLET_HEIGHT
+            root.after(BULLET_SPEED, self.shoot)
+        else:
+            self.destroy()
+
+    def destroy(self):
+        mybullets.pop(self.id)
+        cv.delete(self.id)
+
+
 class enemy:
     def __init__(self, x, y):
         self.x = x
@@ -99,7 +133,7 @@ class enemy:
 
     # noinspection PyAttributeOutsideInit
     def draw(self):
-        self.id = cv.create_image(self.x, self.y, image=ene_tkimg, tag="enemy")
+        self.id = cv.create_image(self.x, self.y, image = ene_tkimg, tag = "enemy")
 
 
 # noinspection PyMethodMayBeStatic
@@ -124,8 +158,20 @@ class pre:
             self.flg = True
         root.after(700, self.ene_bu)
 
+    def hp(self):
+        hankei = 40
+        nt = time()
+        for s in range(1, 128):
+            rad = pi * s / 64
+            fx = ene_w + cos(rad) * hankei
+            fy = ene_h + sin(rad) * hankei
+            enemybullet = EnemyBullet(fx, fy, rad, self.flg, nt)
+            enemybullet.draw2()
 
-# noinspection PyMethodMayBeStatic
+        root.after(700, self.hp)
+
+
+# noinspection PyMethodMayBeStatic,PyAttributeOutsideInit
 class EnemyBullet:  # 敵の弾
     def __init__(self, x, y, radian, flg, nt):
         self.x = x
@@ -136,8 +182,12 @@ class EnemyBullet:  # 敵の弾
 
     # noinspection PyAttributeOutsideInit
     def draw(self):
-        self.id = cv.create_image(self.x, self.y, image=shot_tkimg, tag="bullet")
+        self.id = cv.create_image(self.x, self.y, image = shot_tkimg, tag = "bullet")
         bullet1[self.id] = self.radian
+
+    def draw2(self):
+        self.id = cv.create_image(self.x, self.y, image = shot_tkimg, tag = "HP")
+        HP[self.id] = self.radian
 
     # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
     def shoot(self):
@@ -162,10 +212,15 @@ class EnemyBullet:  # 敵の弾
         cv.delete(self.id)
 
 
+def destroy2():
+    cv.delete(HP[0])
+    HP[0].pop()
+
+
 # noinspection PyMethodMayBeStatic
 class music:
     def bgm(self):
-        pygame.mixer.init(frequency=44100)  # 初期設定
+        pygame.mixer.init(frequency = 44100)  # 初期設定
         ms = glob("music/*.mp3")
         for m in ms:
             pygame.mixer.music.load(m)  # 音楽ファイルの読み込み
@@ -175,17 +230,19 @@ class music:
 
 if __name__ == '__main__':
     bullet1 = {}
+    HP = {}
+    mybullets = []
     mu = music()
     mu.bgm()
 
     root = tk.Tk()
     root.title("invader")
     root.geometry("{0}x{1}+300+300".format(WINDOW_WIDTH, WINDOW_HEIGHT))
-    cv = tk.Canvas(root, width=WINDOW_WIDTH, height=WINDOW_HEIGHT, bg="black")
+    cv = tk.Canvas(root, width = WINDOW_WIDTH, height = WINDOW_HEIGHT, bg = "black")
     cv.pack()
     menubar = tk.Menu(root)
-    root.configure(menu=menubar)
-    menubar.add_command(label="QUIT", underline=0, command=root.quit)
+    root.configure(menu = menubar)
+    menubar.add_command(label = "QUIT", underline = 0, command = root.quit)
 
     shot_img = Image.open("images/gai.jpg")
     shot_tkimg = ImageTk.PhotoImage(shot_img)
