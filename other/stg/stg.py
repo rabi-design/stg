@@ -111,9 +111,9 @@ class mybullet:
     # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
     def shoot(self):
         if -100 < self.y <= WINDOW_HEIGHT + 100 and -100 < self.x < WINDOW_WIDTH + 100:
-            if (self.x - ene_w) ^ 2 + (self.y - ene_h) ^ 2 < 250000:
+            if (self.x - ene_w) ** 2 + (self.y - ene_h) ** 2 < 250000:
                 self.destroy()
-                destroy2()
+                # destroy2()
             cv.move(self.id, 0, BULLET_HEIGHT)
             self.y += BULLET_HEIGHT
             root.after(BULLET_SPEED, self.shoot)
@@ -121,7 +121,6 @@ class mybullet:
             self.destroy()
 
     def destroy(self):
-        mybullets.pop(self.id)
         cv.delete(self.id)
 
 
@@ -212,9 +211,9 @@ class EnemyBullet:  # 敵の弾
         cv.delete(self.id)
 
 
-def destroy2():
-    cv.delete(HP[0])
-    HP[0].pop()
+# def destroy2():
+#     cv.delete(HP[0])
+#     HP[0].pop()
 
 
 # noinspection PyMethodMayBeStatic
@@ -232,8 +231,8 @@ if __name__ == '__main__':
     bullet1 = {}
     HP = {}
     mybullets = []
-    mu = music()
-    mu.bgm()
+    # mu = music()
+    # mu.bgm()
 
     root = tk.Tk()
     root.title("invader")
@@ -257,6 +256,7 @@ if __name__ == '__main__':
     ene.draw()
     prepare = pre()
     prepare.ene_bu()
+    prepare.hp()
     pygame.display.set_mode((w, h), 0, 32)
     screen = pygame.display.get_surface()
     # インスタンス生成
